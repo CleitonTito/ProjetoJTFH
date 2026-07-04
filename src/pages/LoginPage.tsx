@@ -7,6 +7,7 @@ import { FirebaseError } from 'firebase/app'
 import logoCorre from '@/assets/branding/logo-corre.png'
 import { signIn } from '@/firebase/auth'
 import { useAuth } from '@/hooks/useAuth'
+import { toAuthEmail } from '@/utils/phoneAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,7 +20,15 @@ import {
 } from '@/components/ui/card'
 
 const loginSchema = z.object({
-  email: z.string().min(1, 'Informe o e-mail').email('E-mail inválido'),
+  identifier: z
+    .string()
+    .min(1, 'Informe o telefone ou e-mail')
+    .refine((value) => {
+      if (value.includes('@')) {
+        return z.string().email().safeParse(value).success
+      }
+      return value.replace(/\D/g, '').length >= 8
+    }, 'Informe um telefone com DDD ou um e-mail válido'),
   password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres'),
 })
 
@@ -41,10 +50,10 @@ export function LoginPage() {
     setAuthError(null)
 
     try {
-      await signIn(values.email, values.password)
+      await signIn(toAuthEmail(values.identifier), values.password)
     } catch (error) {
       if (error instanceof FirebaseError) {
-        setAuthError('E-mail ou senha inválidos.')
+        setAuthError('Telefone/e-mail ou senha inválidos.')
       } else {
         setAuthError('Não foi possível entrar. Tente novamente.')
       }
@@ -70,15 +79,16 @@ export function LoginPage() {
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="identifier">Telefone ou e-mail</Label>
               <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                {...register('email')}
+                id="identifier"
+                type="text"
+                autoComplete="username"
+                placeholder="11987654321"
+                {...register('identifier')}
               />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+              {errors.identifier && (
+                <p className="text-sm text-destructive">{errors.identifier.message}</p>
               )}
             </div>
 

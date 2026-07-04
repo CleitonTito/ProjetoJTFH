@@ -4,7 +4,8 @@ export interface AppUser {
   id: string
   organizationId: string
   name: string
-  email: string
+  email?: string
+  phone?: string
   role: UserRole
   photoUrl?: string
   createdAt: Date
