@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { FirebaseError } from 'firebase/app'
+import logoCorre from '@/assets/branding/logo-corre.png'
 import { signIn } from '@/firebase/auth'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
@@ -59,7 +60,8 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center p-4">
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-4">
+      <img src={logoCorre} alt="Projeto JTFH" className="w-48 rounded-lg shadow-sm" />
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Mural de Informações</CardTitle>

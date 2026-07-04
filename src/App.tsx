@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { LoginPage } from '@/pages/LoginPage'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { AppLayout } from '@/layouts/AppLayout'
 
 function App() {
   return (
@@ -8,15 +9,21 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
-          path="/"
           element={
             <ProtectedRoute>
-              <div className="flex min-h-svh items-center justify-center">
-                <h1 className="text-2xl font-semibold">Mural de Informações</h1>
-              </div>
+              <AppLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route
+            path="/"
+            element={
+              <div className="flex flex-1 items-center justify-center p-8">
+                <h1 className="text-2xl font-semibold">Mural de Informações</h1>
+              </div>
+            }
+          />
+        </Route>
       </Routes>
     </BrowserRouter>
   )
