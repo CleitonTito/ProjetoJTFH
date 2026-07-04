@@ -13,5 +13,16 @@ service cloud.firestore {
     match /organizations/{orgId} {
       allow read: if request.auth != null && getUserData().organizationId == orgId;
     }
+
+    match /categories/{categoryId} {
+      allow read: if request.auth != null
+        && getUserData().organizationId == resource.data.organizationId;
+      allow create: if request.auth != null
+        && getUserData().role == 'admin'
+        && getUserData().organizationId == request.resource.data.organizationId;
+      allow update, delete: if request.auth != null
+        && getUserData().role == 'admin'
+        && getUserData().organizationId == resource.data.organizationId;
+    }
   }
 }
