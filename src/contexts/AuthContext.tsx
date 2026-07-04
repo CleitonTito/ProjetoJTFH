@@ -20,7 +20,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user)
-      setAppUser(user ? await getUserById(user.uid) : null)
+
+      try {
+        setAppUser(user ? await getUserById(user.uid) : null)
+      } catch (error) {
+        console.error('Failed to load user profile', error)
+        setAppUser(null)
+      }
+
       setLoading(false)
     })
 
