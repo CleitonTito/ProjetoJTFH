@@ -3,6 +3,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { HomePage } from '@/pages/HomePage'
 import { PublicationDetailPage } from '@/pages/PublicationDetailPage'
 import { CategoriesPage } from '@/pages/admin/CategoriesPage'
+import { DashboardPage } from '@/pages/admin/DashboardPage'
 import { PublicationsPage } from '@/pages/admin/PublicationsPage'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { AppLayout } from '@/layouts/AppLayout'
@@ -21,6 +22,14 @@ function App() {
         >
           <Route path="/" element={<HomePage />} />
           <Route path="/publicacoes/:id" element={<PublicationDetailPage />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin/categorias"
             element={
