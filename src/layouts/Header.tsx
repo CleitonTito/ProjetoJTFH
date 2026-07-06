@@ -18,6 +18,11 @@ export function Header() {
         <span className="text-lg font-semibold">Mural de Informações</span>
       </div>
       <nav className="flex items-center gap-4">
+        {(appUser?.role === 'admin' || appUser?.role === 'editor') && (
+          <Link to="/admin/publicacoes" className="text-sm font-medium hover:underline">
+            Publicações
+          </Link>
+        )}
         {appUser?.role === 'admin' && (
           <Link to="/admin/categorias" className="text-sm font-medium hover:underline">
             Categorias

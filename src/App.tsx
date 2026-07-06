@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { LoginPage } from '@/pages/LoginPage'
 import { CategoriesPage } from '@/pages/admin/CategoriesPage'
+import { PublicationsPage } from '@/pages/admin/PublicationsPage'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { AppLayout } from '@/layouts/AppLayout'
 
@@ -29,6 +30,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/publicacoes"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'editor']}>
+                <PublicationsPage />
               </ProtectedRoute>
             }
           />

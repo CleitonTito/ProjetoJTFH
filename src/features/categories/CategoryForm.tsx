@@ -68,7 +68,12 @@ export function CategoryForm({ defaultValues, onSubmit, onCancel }: CategoryForm
           onValueChange={(value) => setValue('icon', value ?? '', { shouldValidate: true })}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Escolha um ícone" />
+            <SelectValue>
+              {(selectedIcon: string | null) => {
+                const found = CATEGORY_ICONS.find((option) => option.value === selectedIcon)
+                return found ? found.label : 'Escolha um ícone'
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {CATEGORY_ICONS.map(({ value, label, icon: Icon }) => (

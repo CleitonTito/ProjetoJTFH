@@ -19,6 +19,7 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         code: false,
         codeBlock: false,
         horizontalRule: false,
+        link: false,
       }),
       Link.configure({ openOnClick: false, autolink: true }),
     ],
