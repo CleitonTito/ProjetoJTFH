@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { LoginPage } from '@/pages/LoginPage'
 import { HomePage } from '@/pages/HomePage'
+import { PublicationDetailPage } from '@/pages/PublicationDetailPage'
 import { CategoriesPage } from '@/pages/admin/CategoriesPage'
 import { PublicationsPage } from '@/pages/admin/PublicationsPage'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -19,6 +20,7 @@ function App() {
           }
         >
           <Route path="/" element={<HomePage />} />
+          <Route path="/publicacoes/:id" element={<PublicationDetailPage />} />
           <Route
             path="/admin/categorias"
             element={

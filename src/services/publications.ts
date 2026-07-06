@@ -3,6 +3,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
@@ -66,6 +67,16 @@ export async function getPublications(organizationId: string): Promise<Publicati
   const snapshot = await getDocs(q)
 
   return snapshot.docs.map(mapDoc)
+}
+
+export async function getPublicationById(id: string): Promise<Publication | null> {
+  const snapshot = await getDoc(doc(db, 'publications', id))
+
+  if (!snapshot.exists()) {
+    return null
+  }
+
+  return mapDoc(snapshot as QueryDocumentSnapshot)
 }
 
 export async function createPublication(input: PublicationInput): Promise<string> {
