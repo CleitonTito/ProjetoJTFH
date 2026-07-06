@@ -24,5 +24,16 @@ service cloud.firestore {
         && getUserData().role == 'admin'
         && getUserData().organizationId == resource.data.organizationId;
     }
+
+    match /publications/{publicationId} {
+      allow read: if request.auth != null
+        && getUserData().organizationId == resource.data.organizationId;
+      allow create: if request.auth != null
+        && (getUserData().role == 'admin' || getUserData().role == 'editor')
+        && getUserData().organizationId == request.resource.data.organizationId;
+      allow update, delete: if request.auth != null
+        && (getUserData().role == 'admin' || getUserData().role == 'editor')
+        && getUserData().organizationId == resource.data.organizationId;
+    }
   }
 }
