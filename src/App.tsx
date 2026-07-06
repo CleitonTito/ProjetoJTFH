@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { LoginPage } from '@/pages/LoginPage'
+import { HomePage } from '@/pages/HomePage'
 import { CategoriesPage } from '@/pages/admin/CategoriesPage'
 import { PublicationsPage } from '@/pages/admin/PublicationsPage'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -17,14 +18,7 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route
-            path="/"
-            element={
-              <div className="flex flex-1 items-center justify-center p-8">
-                <h1 className="text-2xl font-semibold">Mural de Informações</h1>
-              </div>
-            }
-          />
+          <Route path="/" element={<HomePage />} />
           <Route
             path="/admin/categorias"
             element={
