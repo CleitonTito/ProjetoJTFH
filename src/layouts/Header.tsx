@@ -1,8 +1,12 @@
+import { Link } from 'react-router-dom'
 import logoCorre from '@/assets/branding/logo-corre.png'
 import { Button } from '@/components/ui/button'
 import { signOut } from '@/firebase/auth'
+import { useAuth } from '@/hooks/useAuth'
 
 export function Header() {
+  const { appUser } = useAuth()
+
   return (
     <header className="flex items-center justify-between border-b px-6 py-3">
       <div className="flex items-center gap-3">
@@ -13,9 +17,16 @@ export function Header() {
         />
         <span className="text-lg font-semibold">Mural de Informações</span>
       </div>
-      <Button variant="outline" onClick={() => signOut()}>
-        Sair
-      </Button>
+      <nav className="flex items-center gap-4">
+        {appUser?.role === 'admin' && (
+          <Link to="/admin/categorias" className="text-sm font-medium hover:underline">
+            Categorias
+          </Link>
+        )}
+        <Button variant="outline" onClick={() => signOut()}>
+          Sair
+        </Button>
+      </nav>
     </header>
   )
 }

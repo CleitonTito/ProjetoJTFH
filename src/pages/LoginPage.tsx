@@ -8,6 +8,7 @@ import logoCorre from '@/assets/branding/logo-corre.png'
 import { signIn } from '@/firebase/auth'
 import { useAuth } from '@/hooks/useAuth'
 import { toAuthEmail } from '@/utils/phoneAuth'
+import { LoadingScreen } from '@/components/LoadingScreen'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -61,7 +62,7 @@ export function LoginPage() {
   }
 
   if (loading) {
-    return null
+    return <LoadingScreen />
   }
 
   if (firebaseUser) {

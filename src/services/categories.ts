@@ -46,8 +46,8 @@ export async function getCategories(organizationId: string): Promise<Category[]>
       color: data.color,
       order: data.order,
       active: data.active,
-      createdAt: data.createdAt.toDate(),
-      updatedAt: data.updatedAt.toDate(),
+      createdAt: data.createdAt?.toDate() ?? new Date(),
+      updatedAt: data.updatedAt?.toDate() ?? new Date(),
     }
   })
 }

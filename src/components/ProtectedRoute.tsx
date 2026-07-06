@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { LoadingScreen } from '@/components/LoadingScreen'
 import type { UserRole } from '@/types'
 
 interface ProtectedRouteProps {
@@ -12,7 +13,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   const { firebaseUser, appUser, loading } = useAuth()
 
   if (loading) {
-    return null
+    return <LoadingScreen />
   }
 
   if (!firebaseUser || !appUser) {

@@ -18,7 +18,7 @@ export async function getUserById(uid: string): Promise<AppUser | null> {
     email: data.email,
     role: data.role,
     photoUrl: data.photoUrl,
-    createdAt: data.createdAt.toDate(),
-    updatedAt: data.updatedAt.toDate(),
+    createdAt: data.createdAt?.toDate() ?? new Date(),
+    updatedAt: data.updatedAt?.toDate() ?? new Date(),
   }
 }
