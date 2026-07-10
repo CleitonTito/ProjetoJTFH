@@ -21,6 +21,7 @@ export function Header() {
   const canSeeDashboard = appUser?.role === 'admin'
   const canSeePublications = appUser?.role === 'admin' || appUser?.role === 'editor'
   const canSeeCategories = appUser?.role === 'admin'
+  const canSeeUsers = appUser?.role === 'admin'
 
   const navLinks = (
     <>
@@ -49,6 +50,15 @@ export function Header() {
           className="text-sm font-medium hover:underline"
         >
           Categorias
+        </Link>
+      )}
+      {canSeeUsers && (
+        <Link
+          to="/admin/usuarios"
+          onClick={() => setMenuOpen(false)}
+          className="text-sm font-medium hover:underline"
+        >
+          Usuários
         </Link>
       )}
     </>

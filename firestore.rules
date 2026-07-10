@@ -8,6 +8,12 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
+      allow read, update, delete: if request.auth != null
+        && getUserData().role == 'admin'
+        && getUserData().organizationId == resource.data.organizationId;
+      allow create: if request.auth != null
+        && getUserData().role == 'admin'
+        && getUserData().organizationId == request.resource.data.organizationId;
     }
 
     match /organizations/{orgId} {

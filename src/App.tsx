@@ -5,6 +5,7 @@ import { PublicationDetailPage } from '@/pages/PublicationDetailPage'
 import { CategoriesPage } from '@/pages/admin/CategoriesPage'
 import { DashboardPage } from '@/pages/admin/DashboardPage'
 import { PublicationsPage } from '@/pages/admin/PublicationsPage'
+import { UsersPage } from '@/pages/admin/UsersPage'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { AppLayout } from '@/layouts/AppLayout'
 
@@ -43,6 +44,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['admin', 'editor']}>
                 <PublicationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/usuarios"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <UsersPage />
               </ProtectedRoute>
             }
           />
