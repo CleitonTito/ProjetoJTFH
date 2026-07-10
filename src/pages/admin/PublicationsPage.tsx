@@ -32,8 +32,10 @@ import {
 import { useAuth } from '@/hooks/useAuth'
 import { getCategories } from '@/services/categories'
 import {
+  addPublicationUpdate,
   createPublication,
   deletePublication,
+  getPublicationById,
   getPublications,
   updatePublication,
   type PublicationInput,
@@ -42,6 +44,7 @@ import {
   PublicationForm,
   type PublicationFormValues,
 } from '@/features/publications/PublicationForm'
+import { PublicationUpdates } from '@/features/publications/PublicationUpdates'
 import type { Attachment, Publication, PublicationStatus } from '@/types'
 
 const STATUS_LABELS: Record<PublicationStatus, string> = {
@@ -213,6 +216,28 @@ export function PublicationsPage() {
     }
   }
 
+  async function handleAddUpdate(message: string) {
+    if (!editingPublication || !appUser) {
+      return
+    }
+
+    await addPublicationUpdate(editingPublication.id, {
+      message,
+      authorId: appUser.id,
+      authorName: appUser.name,
+      authorPhotoUrl: appUser.photoUrl,
+    })
+
+    const refreshed = await getPublicationById(editingPublication.id)
+
+    if (refreshed) {
+      setEditingPublication(refreshed)
+      queryClient.setQueryData<Publication[]>(['publications', organizationId], (old) =>
+        (old ?? []).map((item) => (item.id === refreshed.id ? refreshed : item)),
+      )
+    }
+  }
+
   async function handleDuplicate(publication: Publication) {
     try {
       const input = toInput(
@@ -372,6 +397,16 @@ export function PublicationsPage() {
               onSubmit={handleSubmit}
               onCancel={() => setDialogOpen(false)}
             />
+          )}
+
+          {dialogOpen && editingPublication && (
+            <div className="flex flex-col gap-3 border-t pt-4">
+              <h3 className="text-sm font-semibold">Atualizações</h3>
+              <PublicationUpdates
+                updates={editingPublication.updates ?? []}
+                onAddUpdate={handleAddUpdate}
+              />
+            </div>
           )}
         </DialogContent>
       </Dialog>

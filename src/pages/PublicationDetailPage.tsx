@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { getCategories } from '@/services/categories'
 import { getPublicationById, getPublications } from '@/services/publications'
 import { PublicationCard } from '@/features/publications/PublicationCard'
+import { PublicationUpdates } from '@/features/publications/PublicationUpdates'
 import { LoadingScreen } from '@/components/LoadingScreen'
 
 export function PublicationDetailPage() {
@@ -73,7 +74,7 @@ export function PublicationDetailPage() {
       <img
         src={publication.coverImageUrl}
         alt=""
-        className="aspect-video w-full rounded-lg object-cover"
+        className="max-h-[520px] w-full rounded-lg bg-muted object-contain"
       />
 
       <div className="flex flex-col gap-2">
@@ -113,6 +114,13 @@ export function PublicationDetailPage() {
               </a>
             ))}
           </div>
+        </div>
+      )}
+
+      {publication.updates && publication.updates.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold">Atualizações</h2>
+          <PublicationUpdates updates={publication.updates} />
         </div>
       )}
 

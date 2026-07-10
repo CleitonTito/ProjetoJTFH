@@ -1,5 +1,6 @@
 import {
   addDoc,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -14,7 +15,7 @@ import {
   type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 import { db } from '@/firebase/config'
-import type { Attachment, Publication, PublicationStatus } from '@/types'
+import type { Attachment, Publication, PublicationStatus, PublicationUpdate } from '@/types'
 
 const publicationsCollection = collection(db, 'publications')
 
@@ -52,6 +53,12 @@ function mapDoc(docSnap: QueryDocumentSnapshot): Publication {
     status: data.status,
     tags: data.tags ?? [],
     attachments: data.attachments ?? [],
+    updates: (data.updates ?? [])
+      .map((update: PublicationUpdate & { createdAt: Timestamp }) => ({
+        ...update,
+        createdAt: update.createdAt?.toDate() ?? new Date(),
+      }))
+      .sort((a: PublicationUpdate, b: PublicationUpdate) => b.createdAt.getTime() - a.createdAt.getTime()),
     createdAt: data.createdAt?.toDate() ?? new Date(),
     updatedAt: data.updatedAt?.toDate() ?? new Date(),
   }
@@ -100,4 +107,28 @@ export async function updatePublication(id: string, input: PublicationInput): Pr
 
 export async function deletePublication(id: string): Promise<void> {
   await deleteDoc(doc(db, 'publications', id))
+}
+
+export interface PublicationUpdateInput {
+  message: string
+  authorId: string
+  authorName: string
+  authorPhotoUrl?: string
+}
+
+export async function addPublicationUpdate(
+  id: string,
+  input: PublicationUpdateInput,
+): Promise<void> {
+  await updateDoc(doc(db, 'publications', id), {
+    updates: arrayUnion({
+      id: crypto.randomUUID(),
+      message: input.message,
+      authorId: input.authorId,
+      authorName: input.authorName,
+      authorPhotoUrl: input.authorPhotoUrl ?? null,
+      createdAt: Timestamp.now(),
+    }),
+    updatedAt: serverTimestamp(),
+  })
 }

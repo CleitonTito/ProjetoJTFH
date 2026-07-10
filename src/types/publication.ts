@@ -7,6 +7,15 @@ export interface Attachment {
   type?: string
 }
 
+export interface PublicationUpdate {
+  id: string
+  message: string
+  authorId: string
+  authorName: string
+  authorPhotoUrl?: string
+  createdAt: Date
+}
+
 export interface Publication {
   id: string
   organizationId: string
@@ -22,6 +31,7 @@ export interface Publication {
   status: PublicationStatus
   tags: string[]
   attachments?: Attachment[]
+  updates?: PublicationUpdate[]
   createdAt: Date
   updatedAt: Date
 }

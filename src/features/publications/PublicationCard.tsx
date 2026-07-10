@@ -12,7 +12,11 @@ interface PublicationCardProps {
 export function PublicationCard({ publication, categoryName }: PublicationCardProps) {
   return (
     <Card className="flex flex-col">
-      <img src={publication.coverImageUrl} alt="" className="aspect-video w-full object-cover" />
+      <img
+        src={publication.coverImageUrl}
+        alt=""
+        className="aspect-video w-full bg-muted object-contain"
+      />
       <CardContent className="flex flex-1 flex-col gap-2">
         {categoryName && (
           <span className="w-fit rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
