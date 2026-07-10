@@ -116,6 +116,7 @@ export async function setPublicationUpdates(
     updates: updates.map((update) => ({
       id: update.id,
       message: update.message,
+      imageUrl: update.imageUrl ?? null,
       authorId: update.authorId,
       authorName: update.authorName,
       authorPhotoUrl: update.authorPhotoUrl ?? null,

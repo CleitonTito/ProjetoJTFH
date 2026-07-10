@@ -10,6 +10,7 @@ export interface Attachment {
 export interface PublicationUpdate {
   id: string
   message: string
+  imageUrl?: string
   authorId: string
   authorName: string
   authorPhotoUrl?: string

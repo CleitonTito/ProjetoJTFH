@@ -227,7 +227,7 @@ export function PublicationsPage() {
     }
   }
 
-  async function handleAddUpdate(message: string) {
+  async function handleAddUpdate(message: string, imageUrl?: string) {
     if (!editingPublication || !appUser) {
       return
     }
@@ -235,6 +235,7 @@ export function PublicationsPage() {
     const newUpdate: PublicationUpdate = {
       id: crypto.randomUUID(),
       message,
+      imageUrl,
       authorId: appUser.id,
       authorName: appUser.name,
       authorPhotoUrl: appUser.photoUrl,
@@ -248,13 +249,13 @@ export function PublicationsPage() {
     await refreshEditingPublication(editingPublication.id)
   }
 
-  async function handleEditUpdate(updateId: string, message: string) {
+  async function handleEditUpdate(updateId: string, message: string, imageUrl?: string) {
     if (!editingPublication) {
       return
     }
 
     const updated = (editingPublication.updates ?? []).map((update) =>
-      update.id === updateId ? { ...update, message } : update,
+      update.id === updateId ? { ...update, message, imageUrl } : update,
     )
 
     await setPublicationUpdates(editingPublication.id, updated)
