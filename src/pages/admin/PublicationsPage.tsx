@@ -32,11 +32,11 @@ import {
 import { useAuth } from '@/hooks/useAuth'
 import { getCategories } from '@/services/categories'
 import {
-  addPublicationUpdate,
   createPublication,
   deletePublication,
   getPublicationById,
   getPublications,
+  setPublicationUpdates,
   updatePublication,
   type PublicationInput,
 } from '@/services/publications'
@@ -45,7 +45,7 @@ import {
   type PublicationFormValues,
 } from '@/features/publications/PublicationForm'
 import { PublicationUpdates } from '@/features/publications/PublicationUpdates'
-import type { Attachment, Publication, PublicationStatus } from '@/types'
+import type { Attachment, Publication, PublicationStatus, PublicationUpdate } from '@/types'
 
 const STATUS_LABELS: Record<PublicationStatus, string> = {
   draft: 'Rascunho',
@@ -216,19 +216,8 @@ export function PublicationsPage() {
     }
   }
 
-  async function handleAddUpdate(message: string) {
-    if (!editingPublication || !appUser) {
-      return
-    }
-
-    await addPublicationUpdate(editingPublication.id, {
-      message,
-      authorId: appUser.id,
-      authorName: appUser.name,
-      authorPhotoUrl: appUser.photoUrl,
-    })
-
-    const refreshed = await getPublicationById(editingPublication.id)
+  async function refreshEditingPublication(id: string) {
+    const refreshed = await getPublicationById(id)
 
     if (refreshed) {
       setEditingPublication(refreshed)
@@ -236,6 +225,53 @@ export function PublicationsPage() {
         (old ?? []).map((item) => (item.id === refreshed.id ? refreshed : item)),
       )
     }
+  }
+
+  async function handleAddUpdate(message: string) {
+    if (!editingPublication || !appUser) {
+      return
+    }
+
+    const newUpdate: PublicationUpdate = {
+      id: crypto.randomUUID(),
+      message,
+      authorId: appUser.id,
+      authorName: appUser.name,
+      authorPhotoUrl: appUser.photoUrl,
+      createdAt: new Date(),
+    }
+
+    await setPublicationUpdates(editingPublication.id, [
+      ...(editingPublication.updates ?? []),
+      newUpdate,
+    ])
+    await refreshEditingPublication(editingPublication.id)
+  }
+
+  async function handleEditUpdate(updateId: string, message: string) {
+    if (!editingPublication) {
+      return
+    }
+
+    const updated = (editingPublication.updates ?? []).map((update) =>
+      update.id === updateId ? { ...update, message } : update,
+    )
+
+    await setPublicationUpdates(editingPublication.id, updated)
+    await refreshEditingPublication(editingPublication.id)
+  }
+
+  async function handleDeleteUpdate(updateId: string) {
+    if (!editingPublication) {
+      return
+    }
+
+    const updated = (editingPublication.updates ?? []).filter(
+      (update) => update.id !== updateId,
+    )
+
+    await setPublicationUpdates(editingPublication.id, updated)
+    await refreshEditingPublication(editingPublication.id)
   }
 
   async function handleDuplicate(publication: Publication) {
@@ -405,6 +441,8 @@ export function PublicationsPage() {
               <PublicationUpdates
                 updates={editingPublication.updates ?? []}
                 onAddUpdate={handleAddUpdate}
+                onEditUpdate={handleEditUpdate}
+                onDeleteUpdate={handleDeleteUpdate}
               />
             </div>
           )}

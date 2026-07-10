@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -8,12 +9,23 @@ import type { PublicationUpdate } from '@/types'
 interface PublicationUpdatesProps {
   updates: PublicationUpdate[]
   onAddUpdate?: (message: string) => Promise<void>
+  onEditUpdate?: (id: string, message: string) => Promise<void>
+  onDeleteUpdate?: (id: string) => Promise<void>
 }
 
-export function PublicationUpdates({ updates, onAddUpdate }: PublicationUpdatesProps) {
+export function PublicationUpdates({
+  updates,
+  onAddUpdate,
+  onEditUpdate,
+  onDeleteUpdate,
+}: PublicationUpdatesProps) {
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingMessage, setEditingMessage] = useState('')
+
+  const canManage = !!onEditUpdate || !!onDeleteUpdate
 
   async function handleAdd() {
     if (!message.trim() || !onAddUpdate) {
@@ -31,6 +43,43 @@ export function PublicationUpdates({ updates, onAddUpdate }: PublicationUpdatesP
       setError('Não foi possível adicionar a atualização.')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  function startEditing(update: PublicationUpdate) {
+    setError(null)
+    setEditingId(update.id)
+    setEditingMessage(update.message)
+  }
+
+  async function saveEdit(id: string) {
+    if (!onEditUpdate || !editingMessage.trim()) {
+      return
+    }
+
+    try {
+      await onEditUpdate(id, editingMessage.trim())
+      setEditingId(null)
+    } catch (err) {
+      console.error('Failed to edit update', err)
+      setError('Não foi possível editar a atualização.')
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!onDeleteUpdate) {
+      return
+    }
+
+    if (!window.confirm('Excluir essa atualização?')) {
+      return
+    }
+
+    try {
+      await onDeleteUpdate(id)
+    } catch (err) {
+      console.error('Failed to delete update', err)
+      setError('Não foi possível excluir a atualização.')
     }
   }
 
@@ -53,9 +102,10 @@ export function PublicationUpdates({ updates, onAddUpdate }: PublicationUpdatesP
               {submitting ? 'Adicionando...' : 'Adicionar atualização'}
             </Button>
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
       )}
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
       {updates.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nenhuma atualização ainda.</p>
@@ -69,7 +119,7 @@ export function PublicationUpdates({ updates, onAddUpdate }: PublicationUpdatesP
                 )}
                 <AvatarFallback>{getInitials(update.authorName)}</AvatarFallback>
               </Avatar>
-              <div className="flex flex-col gap-0.5">
+              <div className="flex flex-1 flex-col gap-0.5">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span className="font-medium text-foreground">{update.authorName}</span>
                   <span>
@@ -80,7 +130,61 @@ export function PublicationUpdates({ updates, onAddUpdate }: PublicationUpdatesP
                     })}
                   </span>
                 </div>
-                <p className="text-sm">{update.message}</p>
+
+                {editingId === update.id ? (
+                  <div className="flex flex-col gap-2">
+                    <Textarea
+                      value={editingMessage}
+                      onChange={(event) => setEditingMessage(event.target.value)}
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingId(null)}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={!editingMessage.trim()}
+                        onClick={() => saveEdit(update.id)}
+                      >
+                        Salvar
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm">{update.message}</p>
+                    {canManage && (
+                      <div className="flex shrink-0 gap-1">
+                        {onEditUpdate && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => startEditing(update)}
+                          >
+                            <Pencil className="size-3.5" />
+                          </Button>
+                        )}
+                        {onDeleteUpdate && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => handleDelete(update.id)}
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ))}

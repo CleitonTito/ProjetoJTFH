@@ -1,6 +1,5 @@
 import {
   addDoc,
-  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -109,26 +108,19 @@ export async function deletePublication(id: string): Promise<void> {
   await deleteDoc(doc(db, 'publications', id))
 }
 
-export interface PublicationUpdateInput {
-  message: string
-  authorId: string
-  authorName: string
-  authorPhotoUrl?: string
-}
-
-export async function addPublicationUpdate(
+export async function setPublicationUpdates(
   id: string,
-  input: PublicationUpdateInput,
+  updates: PublicationUpdate[],
 ): Promise<void> {
   await updateDoc(doc(db, 'publications', id), {
-    updates: arrayUnion({
-      id: crypto.randomUUID(),
-      message: input.message,
-      authorId: input.authorId,
-      authorName: input.authorName,
-      authorPhotoUrl: input.authorPhotoUrl ?? null,
-      createdAt: Timestamp.now(),
-    }),
+    updates: updates.map((update) => ({
+      id: update.id,
+      message: update.message,
+      authorId: update.authorId,
+      authorName: update.authorName,
+      authorPhotoUrl: update.authorPhotoUrl ?? null,
+      createdAt: Timestamp.fromDate(update.createdAt),
+    })),
     updatedAt: serverTimestamp(),
   })
 }
