@@ -168,11 +168,13 @@ export function PublicationUpdates({
                     <div className="flex flex-col gap-2">
                       <p className="text-sm">{update.message}</p>
                       {update.imageUrl && (
-                        <img
-                          src={update.imageUrl}
-                          alt=""
-                          className="max-h-48 w-full max-w-xs rounded-md bg-muted object-contain"
-                        />
+                        <a href={update.imageUrl} target="_blank" rel="noreferrer">
+                          <img
+                            src={update.imageUrl}
+                            alt=""
+                            className="max-h-48 w-full max-w-xs cursor-pointer rounded-md bg-muted object-contain transition-opacity hover:opacity-80"
+                          />
+                        </a>
                       )}
                     </div>
                     {canManage && (
