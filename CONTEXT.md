@@ -179,11 +179,22 @@ cria/edita/exclui qualquer usuário da própria organização.
 - **Usuários** (`/admin/usuarios`, só admin): criar (com truque da segunda
   instância do Firebase), editar nome/perfil, remover perfil (não exclui a conta
   de login, só revoga acesso — ver seção de Autenticação acima).
+- **Troca de senha** (item "Trocar senha" no menu do `Header`, qualquer perfil
+  logado, inclusive leitor): reautentica com a senha atual
+  (`EmailAuthProvider` + `reauthenticateWithCredential`) antes de chamar
+  `updatePassword` — evita o erro `auth/requires-recent-login` e serve de
+  confirmação de identidade. `src/firebase/auth.ts` (`changePassword`) +
+  `src/features/auth/ChangePasswordForm.tsx`.
 
 ## O que falta / próximos passos possíveis
 
+**Decisão consciente do usuário:** não construir uma tela de "Configurações"/
+"Perfil" (autoatendimento do usuário logado) — gerenciamento de conta (criar,
+editar, promover) fica só com o admin, mesmo pra editor. A única necessidade
+real de autoatendimento identificada era troca de senha, que já foi resolvida
+acima sem precisar de uma seção inteira do painel.
+
 Do prompt original, ainda não construído:
-- **Configurações** e **Perfil** (seções do painel administrativo).
 - Upload de **foto de perfil de verdade** (hoje avatar mostra só iniciais — foi
   decisão consciente do usuário, adiada).
 - Itens de "Evolução futura" do prompt: calendário/agenda, notificações,
