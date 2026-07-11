@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Paperclip } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { getCategories } from '@/services/categories'
 import { getPublicationById, getPublications } from '@/services/publications'
 import { PublicationCard } from '@/features/publications/PublicationCard'
 import { PublicationUpdates } from '@/features/publications/PublicationUpdates'
+import { SharePublication } from '@/features/publications/SharePublication'
 import { LoadingScreen } from '@/components/LoadingScreen'
 
 export function PublicationDetailPage() {
@@ -92,25 +92,28 @@ export function PublicationDetailPage() {
         </p>
       </div>
 
+      <SharePublication
+        title={publication.title}
+        author={publication.author}
+        hasUpdates={!!publication.updates && publication.updates.length > 0}
+      />
+
       <div
         className="rich-text-editor max-w-none"
         dangerouslySetInnerHTML={{ __html: publication.content }}
       />
 
-      {publication.attachments && publication.attachments.length > 0 && (
+      {publication.galleryImages && publication.galleryImages.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h2 className="text-sm font-semibold">Anexos</h2>
-          <div className="flex flex-wrap gap-2">
-            {publication.attachments.map((attachment) => (
-              <a
-                key={attachment.url}
-                href={attachment.url}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1 rounded-md border px-2 py-1 text-xs hover:bg-muted"
-              >
-                <Paperclip className="size-3" />
-                {attachment.name}
+          <h2 className="text-sm font-semibold">Fotos</h2>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {publication.galleryImages.map((url) => (
+              <a key={url} href={url} target="_blank" rel="noreferrer">
+                <img
+                  src={url}
+                  alt=""
+                  className="aspect-square w-full cursor-pointer rounded-md bg-muted object-cover transition-opacity hover:opacity-80"
+                />
               </a>
             ))}
           </div>

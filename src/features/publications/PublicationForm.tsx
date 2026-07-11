@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2, Paperclip, X } from 'lucide-react'
+import { ImagePlus, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,8 +17,11 @@ import {
 } from '@/components/ui/select'
 import { ImageUpload } from '@/components/ImageUpload'
 import { RichTextEditor } from '@/components/RichTextEditor'
-import { uploadFile } from '@/services/imageUpload'
-import type { Attachment, Category, PublicationStatus } from '@/types'
+import { uploadImage } from '@/services/imageUpload'
+import { resizeImage } from '@/utils/resizeImage'
+import type { Category, PublicationStatus } from '@/types'
+
+const MAX_GALLERY_IMAGES = 6
 
 const publicationFormSchema = z.object({
   title: z.string().min(1, 'Informe o título'),
@@ -45,21 +48,21 @@ const STATUS_OPTIONS: { value: PublicationStatus; label: string }[] = [
 interface PublicationFormProps {
   categories: Category[]
   defaultValues: PublicationFormValues
-  defaultAttachments?: Attachment[]
-  onSubmit: (values: PublicationFormValues, attachments: Attachment[]) => Promise<void>
+  defaultGalleryImages?: string[]
+  onSubmit: (values: PublicationFormValues, galleryImages: string[]) => Promise<void>
   onCancel: () => void
 }
 
 export function PublicationForm({
   categories,
   defaultValues,
-  defaultAttachments,
+  defaultGalleryImages,
   onSubmit,
   onCancel,
 }: PublicationFormProps) {
-  const [attachments, setAttachments] = useState<Attachment[]>(defaultAttachments ?? [])
-  const [uploadingAttachment, setUploadingAttachment] = useState(false)
-  const [attachmentError, setAttachmentError] = useState<string | null>(null)
+  const [galleryImages, setGalleryImages] = useState<string[]>(defaultGalleryImages ?? [])
+  const [uploadingGallery, setUploadingGallery] = useState(false)
+  const [galleryError, setGalleryError] = useState<string | null>(null)
 
   const {
     register,
@@ -79,31 +82,46 @@ export function PublicationForm({
   const status = watch('status')
   const highlighted = watch('highlighted')
 
-  async function handleAttachmentSelect(file: File | undefined) {
-    if (!file) {
+  async function handleGalleryFilesSelect(fileList: FileList | null) {
+    if (!fileList || fileList.length === 0) {
       return
     }
 
-    setAttachmentError(null)
-    setUploadingAttachment(true)
+    const files = Array.from(fileList)
+    const remainingSlots = MAX_GALLERY_IMAGES - galleryImages.length
+    const filesToUpload = files.slice(0, remainingSlots)
+
+    setGalleryError(
+      files.length > remainingSlots
+        ? `Só foi possível adicionar ${remainingSlots} foto(s) — limite de ${MAX_GALLERY_IMAGES} por publicação.`
+        : null,
+    )
+
+    if (filesToUpload.length === 0) {
+      return
+    }
+
+    setUploadingGallery(true)
 
     try {
-      const attachment = await uploadFile(file)
-      setAttachments((prev) => [...prev, attachment])
+      const uploadedUrls = await Promise.all(
+        filesToUpload.map(async (file) => uploadImage(await resizeImage(file))),
+      )
+      setGalleryImages((prev) => [...prev, ...uploadedUrls])
     } catch (error) {
-      console.error('Failed to upload attachment', error)
-      setAttachmentError('Não foi possível enviar o anexo.')
+      console.error('Failed to upload gallery images', error)
+      setGalleryError('Não foi possível enviar uma ou mais fotos. Tente novamente.')
     } finally {
-      setUploadingAttachment(false)
+      setUploadingGallery(false)
     }
   }
 
-  function removeAttachment(url: string) {
-    setAttachments((prev) => prev.filter((attachment) => attachment.url !== url))
+  function removeGalleryImage(url: string) {
+    setGalleryImages((prev) => prev.filter((image) => image !== url))
   }
 
   async function submit(values: PublicationFormValues) {
-    await onSubmit(values, attachments)
+    await onSubmit(values, galleryImages)
   }
 
   return (
@@ -175,6 +193,49 @@ export function PublicationForm({
       </div>
 
       <div className="flex flex-col gap-2">
+        <Label>
+          Galeria de fotos (opcional, até {MAX_GALLERY_IMAGES})
+        </Label>
+        {galleryImages.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {galleryImages.map((url) => (
+              <div key={url} className="relative h-20 w-20 overflow-hidden rounded-md border">
+                <img src={url} alt="" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeGalleryImage(url)}
+                  className="absolute top-0.5 right-0.5 rounded-full bg-black/60 p-0.5 text-white hover:bg-black/80"
+                >
+                  <X className="size-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {galleryImages.length < MAX_GALLERY_IMAGES && (
+          <label className="flex w-fit cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(event) => {
+                handleGalleryFilesSelect(event.target.files)
+                event.target.value = ''
+              }}
+            />
+            {uploadingGallery ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <ImagePlus className="size-4" />
+            )}
+            Adicionar fotos
+          </label>
+        )}
+        {galleryError && <p className="text-sm text-destructive">{galleryError}</p>}
+      </div>
+
+      <div className="flex flex-col gap-2">
         <Label>Conteúdo</Label>
         <RichTextEditor
           value={content}
@@ -231,42 +292,6 @@ export function PublicationForm({
           onCheckedChange={(checked) => setValue('highlighted', checked)}
         />
         <Label htmlFor="highlighted">Publicação em destaque</Label>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label>Anexos (opcional)</Label>
-        <div className="flex flex-wrap gap-2">
-          {attachments.map((attachment) => (
-            <span
-              key={attachment.url}
-              className="flex items-center gap-1 rounded-md border px-2 py-1 text-xs"
-            >
-              <Paperclip className="size-3" />
-              {attachment.name}
-              <button
-                type="button"
-                onClick={() => removeAttachment(attachment.url)}
-                className="text-muted-foreground hover:text-destructive"
-              >
-                <X className="size-3" />
-              </button>
-            </span>
-          ))}
-        </div>
-        <label className="flex w-fit cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-          <input
-            type="file"
-            className="hidden"
-            onChange={(event) => handleAttachmentSelect(event.target.files?.[0])}
-          />
-          {uploadingAttachment ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Paperclip className="size-4" />
-          )}
-          Adicionar anexo
-        </label>
-        {attachmentError && <p className="text-sm text-destructive">{attachmentError}</p>}
       </div>
 
       <div className="flex justify-end gap-2 pt-2">

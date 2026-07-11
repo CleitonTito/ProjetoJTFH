@@ -14,7 +14,7 @@ import {
   type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 import { db } from '@/firebase/config'
-import type { Attachment, Publication, PublicationStatus, PublicationUpdate } from '@/types'
+import type { Publication, PublicationStatus, PublicationUpdate } from '@/types'
 
 const publicationsCollection = collection(db, 'publications')
 
@@ -25,13 +25,13 @@ export interface PublicationInput {
   categoryId: string
   summary: string
   coverImageUrl: string
+  galleryImages?: string[]
   content: string
   author: string
   date: Date
   highlighted: boolean
   status: PublicationStatus
   tags: string[]
-  attachments?: Attachment[]
 }
 
 function mapDoc(docSnap: QueryDocumentSnapshot): Publication {
@@ -45,13 +45,13 @@ function mapDoc(docSnap: QueryDocumentSnapshot): Publication {
     categoryId: data.categoryId,
     summary: data.summary,
     coverImageUrl: data.coverImageUrl,
+    galleryImages: data.galleryImages ?? [],
     content: data.content,
     author: data.author,
     date: data.date?.toDate() ?? new Date(),
     highlighted: data.highlighted,
     status: data.status,
     tags: data.tags ?? [],
-    attachments: data.attachments ?? [],
     updates: (data.updates ?? [])
       .map((update: PublicationUpdate & { createdAt: Timestamp }) => ({
         ...update,

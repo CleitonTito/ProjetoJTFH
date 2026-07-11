@@ -45,7 +45,8 @@ import {
   type PublicationFormValues,
 } from '@/features/publications/PublicationForm'
 import { PublicationUpdates } from '@/features/publications/PublicationUpdates'
-import type { Attachment, Publication, PublicationStatus, PublicationUpdate } from '@/types'
+import { SharePublication } from '@/features/publications/SharePublication'
+import type { Publication, PublicationStatus, PublicationUpdate } from '@/types'
 
 const STATUS_LABELS: Record<PublicationStatus, string> = {
   draft: 'Rascunho',
@@ -88,7 +89,7 @@ function toFormValues(publication?: Publication | null): PublicationFormValues {
 function toInput(
   values: PublicationFormValues,
   organizationId: string,
-  attachments: Attachment[],
+  galleryImages: string[],
 ): PublicationInput {
   return {
     organizationId,
@@ -97,6 +98,7 @@ function toInput(
     categoryId: values.categoryId,
     summary: values.summary,
     coverImageUrl: values.coverImageUrl,
+    galleryImages,
     content: values.content,
     author: values.author,
     date: new Date(values.date),
@@ -106,7 +108,6 @@ function toInput(
       .split(',')
       .map((tag) => tag.trim())
       .filter(Boolean),
-    attachments,
   }
 }
 
@@ -180,20 +181,21 @@ export function PublicationsPage() {
     setDialogOpen(true)
   }
 
-  async function handleSubmit(values: PublicationFormValues, attachments: Attachment[]) {
+  async function handleSubmit(values: PublicationFormValues, galleryImages: string[]) {
     setFormError(null)
 
     try {
-      const input = toInput(values, organizationId, attachments)
+      const input = toInput(values, organizationId, galleryImages)
 
       if (editingPublication) {
         await updateMutation.mutateAsync({ id: editingPublication.id, input })
+        setDialogOpen(false)
+        setEditingPublication(null)
       } else {
-        await createMutation.mutateAsync(input)
+        const id = await createMutation.mutateAsync(input)
+        await refreshEditingPublication(id)
       }
 
-      setDialogOpen(false)
-      setEditingPublication(null)
       await invalidatePublications()
     } catch (error) {
       console.error('Failed to save publication', error)
@@ -280,7 +282,7 @@ export function PublicationsPage() {
       const input = toInput(
         { ...toFormValues(publication), title: `${publication.title} (cópia)`, status: 'draft' },
         organizationId,
-        publication.attachments ?? [],
+        publication.galleryImages ?? [],
       )
       await createMutation.mutateAsync(input)
       await invalidatePublications()
@@ -424,13 +426,21 @@ export function PublicationsPage() {
               {editingPublication ? 'Editar publicação' : 'Nova publicação'}
             </DialogTitle>
           </DialogHeader>
+          {dialogOpen && editingPublication && (
+            <SharePublication
+              title={editingPublication.title}
+              author={editingPublication.author}
+              hasUpdates={!!editingPublication.updates && editingPublication.updates.length > 0}
+              url={`${window.location.origin}/publicacoes/${editingPublication.id}`}
+            />
+          )}
           {formError && <p className="text-sm text-destructive">{formError}</p>}
           {dialogOpen && (
             <PublicationForm
               key={editingPublication?.id ?? 'new'}
               categories={categories ?? []}
               defaultValues={toFormValues(editingPublication)}
-              defaultAttachments={editingPublication?.attachments}
+              defaultGalleryImages={editingPublication?.galleryImages}
               onSubmit={handleSubmit}
               onCancel={() => setDialogOpen(false)}
             />
