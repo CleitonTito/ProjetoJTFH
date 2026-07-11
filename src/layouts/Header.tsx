@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { FirebaseError } from 'firebase/app'
 import { Menu } from 'lucide-react'
 import logoCorre from '@/assets/branding/logo-corre.png'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   Sheet,
   SheetContent,
@@ -11,12 +13,46 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { signOut } from '@/firebase/auth'
+import { changePassword, signOut } from '@/firebase/auth'
 import { useAuth } from '@/hooks/useAuth'
+import {
+  ChangePasswordForm,
+  type ChangePasswordFormValues,
+} from '@/features/auth/ChangePasswordForm'
 
 export function Header() {
   const { appUser } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+
+  function openPasswordDialog() {
+    setMenuOpen(false)
+    setPasswordError(null)
+    setPasswordDialogOpen(true)
+  }
+
+  async function handleChangePassword(values: ChangePasswordFormValues) {
+    setPasswordError(null)
+
+    try {
+      await changePassword(values.currentPassword, values.newPassword)
+      setPasswordDialogOpen(false)
+    } catch (error) {
+      console.error('Failed to change password', error)
+
+      if (
+        error instanceof FirebaseError &&
+        (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password')
+      ) {
+        setPasswordError('Senha atual incorreta.')
+      } else if (error instanceof FirebaseError && error.code === 'auth/weak-password') {
+        setPasswordError('A nova senha é muito fraca.')
+      } else {
+        setPasswordError('Não foi possível trocar a senha. Tente novamente.')
+      }
+    }
+  }
 
   const canSeeDashboard = appUser?.role === 'admin'
   const canSeePublications = appUser?.role === 'admin' || appUser?.role === 'editor'
@@ -61,6 +97,13 @@ export function Header() {
           Usuários
         </Link>
       )}
+      <button
+        type="button"
+        onClick={openPasswordDialog}
+        className="text-left text-sm font-medium hover:underline"
+      >
+        Trocar senha
+      </button>
     </>
   )
 
@@ -105,6 +148,21 @@ export function Header() {
           </SheetFooter>
         </SheetContent>
       </Sheet>
+
+      <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Trocar senha</DialogTitle>
+          </DialogHeader>
+          {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
+          {passwordDialogOpen && (
+            <ChangePasswordForm
+              onSubmit={handleChangePassword}
+              onCancel={() => setPasswordDialogOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </header>
   )
 }
