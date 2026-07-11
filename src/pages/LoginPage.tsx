@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -35,9 +35,17 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>
 
+interface LocationState {
+  from?: { pathname: string; search: string }
+}
+
 export function LoginPage() {
   const { firebaseUser, loading } = useAuth()
+  const location = useLocation()
   const [authError, setAuthError] = useState<string | null>(null)
+
+  const state = location.state as LocationState | null
+  const redirectTo = state?.from ? `${state.from.pathname}${state.from.search}` : '/'
 
   const {
     register,
@@ -66,7 +74,7 @@ export function LoginPage() {
   }
 
   if (firebaseUser) {
-    return <Navigate to="/" replace />
+    return <Navigate to={redirectTo} replace />
   }
 
   return (
