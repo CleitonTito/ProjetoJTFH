@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { FirebaseError } from 'firebase/app'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -105,7 +106,12 @@ export function UsersPage() {
       await invalidateUsers()
     } catch (error) {
       console.error('Failed to save user', error)
-      setFormError('Não foi possível salvar o usuário. Verifique os dados e tente novamente.')
+
+      if (error instanceof FirebaseError && error.code === 'auth/email-already-in-use') {
+        setFormError('Esse telefone/e-mail já está cadastrado.')
+      } else {
+        setFormError('Não foi possível salvar o usuário. Verifique os dados e tente novamente.')
+      }
     }
   }
 
