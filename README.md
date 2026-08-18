@@ -1,32 +1,41 @@
-# React + TypeScript + Vite
+# Mural de Informações — Projeto JTFH
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+CMS interno criado para o **Projeto JTFH** (grupo de corrida de rua) com um objetivo simples: acabar com avisos soltos e repetidos numa conversa de grupo. Em vez disso, os organizadores publicam um comunicado (corrida, treino, etc.) num mural centralizado, pesquisável e categorizado — e podem **atualizar esse mesmo aviso** conforme surgem novidades, sem precisar reescrever tudo do zero.
 
-Currently, two official plugins are available:
+🔗 **Demo online:** [projeto-jtfh.vercel.app](https://projeto-jtfh.vercel.app)
+> Peça as credenciais de acesso de demonstração pra experimentar o painel administrativo.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Funcionalidades
 
-## React Compiler
+- **Login** por e-mail ou telefone.
+- **Mural público** (autenticado): busca, filtro por categoria, seção de destaques e últimas publicações.
+- **Publicações** (admin/editor): CRUD completo com imagem de capa, editor de texto rico (Tiptap), anexos, tags, destaque, status (rascunho/publicado/arquivado), duplicar, filtros e busca.
+- **Atualizações incrementais**: cada publicação pode receber novas atualizações (mensagem + imagem opcional + autor + data) sem virar um post novo — o problema que motivou o projeto.
+- **Categorias** (admin): CRUD com ícone e cor.
+- **Usuários** (admin): criação, edição de perfil (admin/editor/leitor) e revogação de acesso.
+- **Dashboard** (admin): contadores por status e categorias mais usadas.
+- **Multi-tenant ready**: todo o modelo de dados já isola por `organizationId`, preparado para múltiplas organizações no futuro.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Stack
 
-## Expanding the Oxlint configuration
+React 19 + Vite + TypeScript + Tailwind CSS v4 + Shadcn/UI (`@base-ui/react`) + React Router + React Hook Form + Zod + TanStack Query + Firebase (Auth + Firestore) + Tiptap + Cloudinary (upload de imagens).
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+Deploy: Vercel (deploy automático a cada push na branch `main`).
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Rodando localmente
+
+```bash
+npm install
+cp .env.example .env   # preencha com suas credenciais de Firebase e Cloudinary
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+```bash
+npm run build   # typecheck + build de produção
+```
+
+As regras de segurança do Firestore estão em `firestore.rules` e precisam ser publicadas manualmente no Firebase Console (Firestore Database → Regras) — não há deploy automático de regras neste projeto.
+
+## Autor
+
+Desenvolvido por [Cleiton Tito](https://github.com/CleitonTito).
