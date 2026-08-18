@@ -40,7 +40,7 @@ interface LocationState {
 }
 
 export function LoginPage() {
-  const { firebaseUser, loading } = useAuth()
+  const { firebaseUser, appUser, loading } = useAuth()
   const location = useLocation()
   const [authError, setAuthError] = useState<string | null>(null)
 
@@ -73,8 +73,23 @@ export function LoginPage() {
     return <LoadingScreen />
   }
 
-  if (firebaseUser) {
+  if (firebaseUser && appUser) {
     return <Navigate to={redirectTo} replace />
+  }
+
+  // Autenticado, mas o perfil (Firestore) não carregou. Nunca redirecionar
+  // baseado só no firebaseUser aqui — o ProtectedRoute exige os dois e manda
+  // de volta pro login, o que criava um loop infinito de navegação nesse caso.
+  if (firebaseUser && !appUser) {
+    return (
+      <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="text-lg font-semibold">Não foi possível carregar seu perfil.</p>
+        <p className="text-sm text-muted-foreground">
+          Tente novamente em alguns segundos.
+        </p>
+        <Button onClick={() => window.location.reload()}>Recarregar</Button>
+      </div>
+    )
   }
 
   return (
