@@ -93,11 +93,27 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-4">
-      <img src={logoCorre} alt="Projeto JTFH" className="w-48 rounded-lg shadow-sm" />
-      <Card className="w-full max-w-sm">
+    <div className="relative flex min-h-svh flex-col items-center justify-center gap-6 overflow-hidden p-4">
+      <div
+        aria-hidden
+        className="animate-blob-a pointer-events-none absolute top-[-15%] left-[-10%] size-96 rounded-full bg-primary/25 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="animate-blob-b pointer-events-none absolute right-[-10%] bottom-[-15%] size-96 rounded-full bg-brand-blue/25 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="animate-blob-c pointer-events-none absolute top-1/2 left-1/2 size-72 rounded-full bg-brand-energy/10 blur-3xl"
+      />
+      <img
+        src={logoCorre}
+        alt="Projeto JTFH"
+        className="relative w-48 rounded-xl shadow-[0_0_40px_-8px_var(--primary)] ring-1 ring-white/10"
+      />
+      <Card className="relative w-full max-w-sm border-white/10 shadow-2xl">
         <CardHeader>
-          <CardTitle>Mural de Informações</CardTitle>
+          <CardTitle className="font-heading text-xl">Mural de Informações</CardTitle>
           <CardDescription>Entre com sua conta para continuar</CardDescription>
         </CardHeader>
         <CardContent>

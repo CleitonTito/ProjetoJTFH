@@ -74,16 +74,16 @@ export function PublicationDetailPage() {
       <img
         src={publication.coverImageUrl}
         alt=""
-        className="max-h-[520px] w-full rounded-lg bg-muted object-contain"
+        className="max-h-[520px] w-full rounded-xl bg-muted object-contain shadow-sm"
       />
 
       <div className="flex flex-col gap-2">
         {categoryName && (
-          <span className="w-fit rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+          <span className="w-fit rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
             {categoryName}
           </span>
         )}
-        <h1 className="text-2xl font-semibold">{publication.title}</h1>
+        <h1 className="font-heading text-2xl font-semibold">{publication.title}</h1>
         {publication.subtitle && (
           <p className="text-lg text-muted-foreground">{publication.subtitle}</p>
         )}

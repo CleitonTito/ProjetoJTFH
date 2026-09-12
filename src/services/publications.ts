@@ -2,6 +2,7 @@ import {
   addDoc,
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -85,9 +86,19 @@ export async function getPublicationById(id: string): Promise<Publication | null
   return mapDoc(snapshot as QueryDocumentSnapshot)
 }
 
+// Firestore rejeita `undefined` em qualquer escrita (addDoc/updateDoc) — campos
+// opcionais como `subtitle` podem chegar como undefined quando vazios (ver
+// `toInput` em PublicationsPage.tsx), então removemos essas chaves antes de
+// gravar em vez de deixar o SDK estourar `invalid data` em runtime.
+function omitUndefined<T extends object>(value: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, fieldValue]) => fieldValue !== undefined),
+  ) as Partial<T>
+}
+
 export async function createPublication(input: PublicationInput): Promise<string> {
   const docRef = await addDoc(publicationsCollection, {
-    ...input,
+    ...omitUndefined(input),
     date: Timestamp.fromDate(input.date),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -97,8 +108,15 @@ export async function createPublication(input: PublicationInput): Promise<string
 }
 
 export async function updatePublication(id: string, input: PublicationInput): Promise<void> {
+  // Ao contrário de addDoc, aqui um campo opcional undefined precisa virar
+  // deleteField() — só omitir a chave deixaria um subtítulo antigo "preso" no
+  // documento quando o usuário limpa o campo e salva.
+  const fields = Object.fromEntries(
+    Object.entries(input).map(([key, value]) => [key, value === undefined ? deleteField() : value]),
+  )
+
   await updateDoc(doc(db, 'publications', id), {
-    ...input,
+    ...fields,
     date: Timestamp.fromDate(input.date),
     updatedAt: serverTimestamp(),
   })

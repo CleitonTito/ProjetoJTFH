@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Zap } from 'lucide-react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -11,15 +12,23 @@ interface PublicationCardProps {
 
 export function PublicationCard({ publication, categoryName }: PublicationCardProps) {
   return (
-    <Card className="flex flex-col">
-      <img
-        src={publication.coverImageUrl}
-        alt=""
-        className="aspect-video w-full bg-muted object-contain"
-      />
+    <Card className="relative flex flex-col border-white/10 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_0_0_1px_color-mix(in_oklch,var(--primary),transparent_50%),0_20px_40px_-16px_var(--primary)]">
+      {publication.highlighted && (
+        <span className="absolute top-2 right-2 z-10 flex items-center gap-1 rounded-full bg-gradient-to-r from-brand-energy to-primary px-2 py-0.5 text-xs font-semibold text-white shadow-md">
+          <Zap className="size-3" />
+          Destaque
+        </span>
+      )}
+      <div className="overflow-hidden">
+        <img
+          src={publication.coverImageUrl}
+          alt=""
+          className="aspect-video w-full bg-muted object-contain transition-transform duration-300 group-hover/card:scale-[1.03]"
+        />
+      </div>
       <CardContent className="flex flex-1 flex-col gap-2">
         {categoryName && (
-          <span className="w-fit rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+          <span className="w-fit rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
             {categoryName}
           </span>
         )}

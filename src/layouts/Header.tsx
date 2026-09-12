@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { FirebaseError } from 'firebase/app'
 import { Menu } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import logoCorre from '@/assets/branding/logo-corre.png'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -22,6 +23,7 @@ import {
 
 export function Header() {
   const { appUser } = useAuth()
+  const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
   const [passwordError, setPasswordError] = useState<string | null>(null)
@@ -59,13 +61,24 @@ export function Header() {
   const canSeeCategories = appUser?.role === 'admin'
   const canSeeUsers = appUser?.role === 'admin'
 
+  function isActive(path: string) {
+    return location.pathname.startsWith(path)
+  }
+
+  function navLinkClass(path: string) {
+    return cn(
+      'rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground',
+      isActive(path) && 'bg-primary/15 text-primary hover:text-primary',
+    )
+  }
+
   const navLinks = (
     <>
       {canSeeDashboard && (
         <Link
           to="/admin/dashboard"
           onClick={() => setMenuOpen(false)}
-          className="text-sm font-medium hover:underline"
+          className={navLinkClass('/admin/dashboard')}
         >
           Dashboard
         </Link>
@@ -74,7 +87,7 @@ export function Header() {
         <Link
           to="/admin/publicacoes"
           onClick={() => setMenuOpen(false)}
-          className="text-sm font-medium hover:underline"
+          className={navLinkClass('/admin/publicacoes')}
         >
           Publicações
         </Link>
@@ -83,7 +96,7 @@ export function Header() {
         <Link
           to="/admin/categorias"
           onClick={() => setMenuOpen(false)}
-          className="text-sm font-medium hover:underline"
+          className={navLinkClass('/admin/categorias')}
         >
           Categorias
         </Link>
@@ -92,7 +105,7 @@ export function Header() {
         <Link
           to="/admin/usuarios"
           onClick={() => setMenuOpen(false)}
-          className="text-sm font-medium hover:underline"
+          className={navLinkClass('/admin/usuarios')}
         >
           Usuários
         </Link>
@@ -100,7 +113,7 @@ export function Header() {
       <button
         type="button"
         onClick={openPasswordDialog}
-        className="text-left text-sm font-medium hover:underline"
+        className="rounded-full px-3 py-1.5 text-left text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         Trocar senha
       </button>
@@ -108,17 +121,19 @@ export function Header() {
   )
 
   return (
-    <header className="flex items-center justify-between border-b px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-background/80 px-4 py-3 backdrop-blur-md sm:px-6">
       <Link to="/" className="flex items-center gap-2 sm:gap-3">
         <img
           src={logoCorre}
           alt="Projeto JTFH"
-          className="h-10 w-10 rounded-full object-cover sm:h-12 sm:w-12"
+          className="h-10 w-10 rounded-full object-cover shadow-[0_0_0_2px_var(--background),0_0_0_3.5px_var(--primary)] sm:h-11 sm:w-11"
         />
-        <span className="text-base font-semibold sm:text-lg">Mural de Informações</span>
+        <span className="font-heading text-base font-semibold sm:text-lg">
+          Mural de Informações
+        </span>
       </Link>
 
-      <nav className="hidden items-center gap-4 sm:flex">
+      <nav className="hidden items-center gap-5 sm:flex">
         {navLinks}
         <Button variant="outline" onClick={() => signOut()}>
           Sair
